@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 
    <link rel="icon" type="image/png" href="favicon de Message App.png">
-
+   
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Message App</title>
 <style>
@@ -68,6 +68,22 @@ main header{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;a
 main h2{font-size:1.25rem;margin:0;flex:1;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #back{display:none;padding:6px 10px}
 .tw{flex:1;min-width:0}
+.msg.bare{background:transparent;padding:2px 4px}
+.stk{font-size:72px;line-height:1.1}
+.gifimg{max-width:220px;max-height:220px;border-radius:14px;display:block}
+#panel{flex-shrink:0;height:250px;border-top:1px solid var(--line);background:var(--side);display:flex;flex-direction:column}
+.ptabs{display:flex;gap:6px;padding:8px;align-items:center}
+.ptabs button.on,.kr button.on{background:var(--accent);color:var(--accent-ink)}
+.pg{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(46px,1fr));gap:4px;padding:8px}
+.pg button{font-size:1.6rem;background:transparent;padding:4px}
+.pg.st{grid-template-columns:repeat(auto-fill,minmax(72px,1fr))}.pg.st button{font-size:3rem}
+.pgif{padding:16px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.hint{margin:0;color:var(--muted);font-size:.85rem}
+#kb{flex-shrink:0;padding:8px 6px calc(8px + env(safe-area-inset-bottom,0px));background:var(--side);border-top:1px solid var(--line);display:flex;flex-direction:column;gap:7px}
+.kr{display:flex;gap:5px;justify-content:center}
+.kr button{flex:1;max-width:46px;padding:12px 0;border-radius:8px;background:var(--panel);font-size:1.1rem}
+.kr button.wide{max-width:none;flex:1.6}
+.kr button.space{max-width:none;flex:5}
 #sub{font-size:.8rem;color:var(--accent);min-height:1.1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #msgs{flex:1;overflow-y:auto;padding:24px 22px;display:flex;flex-direction:column;gap:10px}
 .empty{margin:auto;color:var(--muted);text-align:center}
@@ -134,9 +150,12 @@ main h2{font-size:1.25rem;margin:0;flex:1;font-weight:700;white-space:nowrap;ove
       <input type="text" id="txt" placeholder="Type a message..." autocomplete="off" aria-label="Message">
       <span id="rt" hidden>● 0:00</span>
       <button type="button" class="round" id="cancel" hidden aria-label="Cancel recording">✕</button>
+      <button type="button" class="round" id="emo" aria-label="Emoji, stickers and GIFs">😊</button>
       <button type="button" class="round" id="mic" aria-label="Record audio">🎤</button>
       <button class="primary" id="send" type="button">Send</button>
     </div>
+    <div id="panel" hidden></div>
+    <div id="kb" hidden></div>
   </main>
 </div>
 <div id="menu" hidden></div>
@@ -148,7 +167,7 @@ const sget=()=>{try{const v=sessionStorage.getItem("msgapp-sess");if(v)return v;
 const sset=p=>{try{p?sessionStorage.setItem("msgapp-sess",p):sessionStorage.removeItem("msgapp-sess");}catch(e){}window.name=(window.name||"").replace(/msgapp-sess=\d*;?/g,"")+(p?"msgapp-sess="+p+";":"");};
 let lang="en",authMode="up";const lget=()=>{try{const v=localStorage.getItem("msgapp-lang");if(v)return v;}catch(e){}try{const v=sessionStorage.getItem("msgapp-lang");if(v)return v;}catch(e){}const m=/msgapp-lang=(\w+)/.exec(window.name||"");return m?m[1]:"";};
 lang=lget()==="es"?"es":"en";
-const ES={"Online":"En línea","Online: ":"En línea: ","Add at least one contact first.":"Primero agrega al menos un contacto.","Select at least one contact.":"Selecciona al menos un contacto.","No microphone was found on this device.":"No se encontró ningún micrófono en este dispositivo.","Microphone blocked. Allow it from the lock icon in the address bar, or open the downloaded index.html file instead.":"Micrófono bloqueado. Permítelo desde el candado de la barra de direcciones, o abre el archivo index.html descargado.","The microphone can’t be used here. Open the downloaded index.html file in your browser.":"Aquí no se puede usar el micrófono. Abre el archivo index.html descargado en tu navegador.","Email settings":"Configuración del correo","Service ID":"ID del servicio","Template ID":"ID de la plantilla","Public key":"Clave pública","Enter the security code": "Escribe el código de seguridad", "We sent a 6-digit code to ": "Enviamos un código de 6 dígitos a ", "Demo mode: email sending is not set up, so the code is shown here: ": "Modo de prueba: el envío de correos no está configurado, así que el código se muestra aquí: ", "Verify": "Verificar", "Resend code": "Reenviar código", "Back": "Volver", "Wrong or expired code.": "Código incorrecto o vencido.","Could not read that image.":"No se pudo leer esa imagen.","Your number: ": "Tu número: ", "Select or create a chat.": "Selecciona o crea un chat.", "No messages yet. Say hello!": "Aún no hay mensajes. ¡Saluda!", "Delete chat": "Eliminar chat", "Delete this chat and all its messages?": "¿Eliminar este chat y todos sus mensajes?", "Delete": "Eliminar", "Seen": "Visto", "Sent": "Enviado", "Play audio": "Reproducir audio", "Enter your name.": "Escribe tu nombre.", "Enter a valid email.": "Escribe un correo válido.", "Password must be at least 6 characters.": "La contraseña debe tener al menos 6 caracteres.", "Could not connect. Please try again later.": "No se pudo conectar. Inténtalo más tarde.", "That email is already registered.": "Ese correo ya está registrado.", "Wrong email or password.": "Correo o contraseña incorrectos.", "Something went wrong. Please try again.": "Algo salió mal. Inténtalo de nuevo.", "Name": "Nombre", "Email": "Correo", "Password (6+ characters)": "Contraseña (6+ caracteres)", "Create account": "Crear cuenta", "Log in": "Iniciar sesión", "Create your account": "Crea tu cuenta", "Already have an account? Log in": "¿Ya tienes cuenta? Inicia sesión", "New here? Create an account": "¿Eres nuevo? Crea una cuenta", "Edit profile": "Editar perfil", "Save": "Guardar", "New chat": "Nuevo chat", "Phone number": "Número de teléfono", "Contact name": "Nombre del contacto", "Start chat": "Iniciar chat", "Enter a phone number.": "Escribe un número de teléfono.", "That is your own number.": "Ese es tu propio número.", "Enter a contact name.": "Escribe un nombre para el contacto.", "No account with that number.": "No hay ninguna cuenta con ese número.", "New group": "Nuevo grupo", "Add at least two contacts first.": "Primero agrega al menos dos contactos.", "OK": "Aceptar", "Group name": "Nombre del grupo", "Create": "Crear", "Enter a group name.": "Escribe un nombre para el grupo.", "Select at least two contacts.": "Selecciona al menos dos contactos.", "Change contact name": "Cambiar nombre del contacto", "Change group name": "Cambiar nombre del grupo", "Change group photo": "Cambiar foto del grupo", "Enter a name.": "Escribe un nombre.", "Cancel": "Cancelar", "Choose photo": "Elegir foto", "Change my name": "Cambiar mi nombre", "Change my photo": "Cambiar mi foto", "Log out": "Cerrar sesión", "Microphone": "Micrófono", "Microphone access was denied or is not available.": "El acceso al micrófono fue denegado o no está disponible.", " (You)": " (Tú)", "Type a message...": "Escribe un mensaje...", "Send": "Enviar", "+ New": "+ Nuevo"};
+const ES={"Clear chat": "Vaciar chat", "Clear": "Vaciar", "Clear this chat? Messages will be removed only for you.": "¿Vaciar este chat? Los mensajes se quitarán solo para ti.", "Clear this chat for everyone in the group?": "¿Vaciar este chat para todos en el grupo?", "Emoji": "Emojis", "Stickers": "Stickers", "GIF": "GIF", "Choose GIF": "Elegir GIF", "GIF files up to 500 KB.": "Archivos GIF de hasta 500 KB.", "Could not send that file.": "No se pudo enviar ese archivo.","Online":"En línea","Online: ":"En línea: ","Add at least one contact first.":"Primero agrega al menos un contacto.","Select at least one contact.":"Selecciona al menos un contacto.","No microphone was found on this device.":"No se encontró ningún micrófono en este dispositivo.","Microphone blocked. Allow it from the lock icon in the address bar, or open the downloaded index.html file instead.":"Micrófono bloqueado. Permítelo desde el candado de la barra de direcciones, o abre el archivo index.html descargado.","The microphone can’t be used here. Open the downloaded index.html file in your browser.":"Aquí no se puede usar el micrófono. Abre el archivo index.html descargado en tu navegador.","Email settings":"Configuración del correo","Service ID":"ID del servicio","Template ID":"ID de la plantilla","Public key":"Clave pública","Enter the security code": "Escribe el código de seguridad", "We sent a 6-digit code to ": "Enviamos un código de 6 dígitos a ", "Demo mode: email sending is not set up, so the code is shown here: ": "Modo de prueba: el envío de correos no está configurado, así que el código se muestra aquí: ", "Verify": "Verificar", "Resend code": "Reenviar código", "Back": "Volver", "Wrong or expired code.": "Código incorrecto o vencido.","Could not read that image.":"No se pudo leer esa imagen.","Your number: ": "Tu número: ", "Select or create a chat.": "Selecciona o crea un chat.", "No messages yet. Say hello!": "Aún no hay mensajes. ¡Saluda!", "Delete chat": "Eliminar chat", "Delete this chat and all its messages?": "¿Eliminar este chat y todos sus mensajes?", "Delete": "Eliminar", "Seen": "Visto", "Sent": "Enviado", "Play audio": "Reproducir audio", "Enter your name.": "Escribe tu nombre.", "Enter a valid email.": "Escribe un correo válido.", "Password must be at least 6 characters.": "La contraseña debe tener al menos 6 caracteres.", "Could not connect. Please try again later.": "No se pudo conectar. Inténtalo más tarde.", "That email is already registered.": "Ese correo ya está registrado.", "Wrong email or password.": "Correo o contraseña incorrectos.", "Something went wrong. Please try again.": "Algo salió mal. Inténtalo de nuevo.", "Name": "Nombre", "Email": "Correo", "Password (6+ characters)": "Contraseña (6+ caracteres)", "Create account": "Crear cuenta", "Log in": "Iniciar sesión", "Create your account": "Crea tu cuenta", "Already have an account? Log in": "¿Ya tienes cuenta? Inicia sesión", "New here? Create an account": "¿Eres nuevo? Crea una cuenta", "Edit profile": "Editar perfil", "Save": "Guardar", "New chat": "Nuevo chat", "Phone number": "Número de teléfono", "Contact name": "Nombre del contacto", "Start chat": "Iniciar chat", "Enter a phone number.": "Escribe un número de teléfono.", "That is your own number.": "Ese es tu propio número.", "Enter a contact name.": "Escribe un nombre para el contacto.", "No account with that number.": "No hay ninguna cuenta con ese número.", "New group": "Nuevo grupo", "Add at least two contacts first.": "Primero agrega al menos dos contactos.", "OK": "Aceptar", "Group name": "Nombre del grupo", "Create": "Crear", "Enter a group name.": "Escribe un nombre para el grupo.", "Select at least two contacts.": "Selecciona al menos dos contactos.", "Change contact name": "Cambiar nombre del contacto", "Change group name": "Cambiar nombre del grupo", "Change group photo": "Cambiar foto del grupo", "Enter a name.": "Escribe un nombre.", "Cancel": "Cancelar", "Choose photo": "Elegir foto", "Change my name": "Cambiar mi nombre", "Change my photo": "Cambiar mi foto", "Log out": "Cerrar sesión", "Microphone": "Micrófono", "Microphone access was denied or is not available.": "El acceso al micrófono fue denegado o no está disponible.", " (You)": " (Tú)", "Type a message...": "Escribe un mensaje...", "Send": "Enviar", "+ New": "+ Nuevo"};
 const T=s=>lang==="es"&&ES[s]||s;
 const langItem=()=>[lang==="es"?"Idioma: Español → English":"Language: English → Español",()=>setLang(lang==="es"?"en":"es")];
 function applyStatic(){document.documentElement.lang=lang;$("txt").placeholder=T("Type a message...");$("send").textContent=T("Send");$("new").textContent=T("+ New");}
@@ -178,11 +197,38 @@ const local={
     delete:async()=>mut(o=>{delete o[p];})};},
   collection(c){
     const mk=f=>({where:(k,op,v)=>mk(x=>f(x)&&(op==="=="?x[k]===v:(x[k]||[]).includes(v))),
-      onSnapshot(next){const run=()=>{const o=rd();next({docs:Object.keys(o).filter(k=>k.startsWith(c+"/")&&f(o[k])).map(k=>({id:k.slice(c.length+1),data:()=>o[k]}))});};
+      onSnapshot(next){let last=null;const run=()=>{const o=rd(),ds=Object.keys(o).filter(k=>k.startsWith(c+"/")&&f(o[k])).map(k=>({id:k.slice(c.length+1),data:()=>o[k]})),
+          sig=JSON.stringify(ds.map(d=>[d.id,o[c+"/"+d.id]]));if(sig===last)return;last=sig;next({docs:ds});};
         subs.add(run);run();return()=>subs.delete(run);}});
     const q=mk(()=>true);
     q.add=async d=>{const id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);mut(o=>{o[c+"/"+id]=d;});return{id};};
     return q;}};
+/* optional shared server (Firebase Realtime Database URL) so people on different devices can chat */
+const SERVER="";
+function remote(base){
+  const U=p=>base.replace(/\/$/,"")+"/"+p+".json",pokes=new Set(),poke=()=>setTimeout(()=>pokes.forEach(f=>f()),150);
+  const J=async(m,p,b)=>{const r=await fetch(U(p),{method:m,headers:b!==undefined?{"Content-Type":"application/json"}:undefined,body:b!==undefined?JSON.stringify(b):undefined});if(!r.ok)throw new Error("net");return r.json();};
+  return{
+    doc(p){return{id:p.split("/")[1],
+      get:async()=>{const d=await J("GET",p);return{exists:d!=null,data:()=>d};},
+      set:async d=>{await J("PUT",p,d);poke();},
+      update:async d=>{await J("PATCH",p,d);poke();},
+      delete:async()=>{await J("DELETE",p);poke();}};},
+    collection(c){
+      const mk=f=>({where:(k,op,v)=>mk(x=>f(x)&&(op==="=="?x[k]===v:(x[k]||[]).includes(v))),
+        onSnapshot(next,err){let on=true,last=null;
+          const run=async()=>{try{const o=(await J("GET",c))||{},sig=JSON.stringify(o);if(sig===last)return;last=sig;
+            next({docs:Object.keys(o).filter(k=>f(o[k])).map(k=>({id:k,data:()=>o[k]}))});}catch(e){err&&err(e);}};
+          run();const iv=setInterval(()=>{if(on&&document.visibilityState==="visible")run();},2000);pokes.add(run);
+          return()=>{on=false;clearInterval(iv);pokes.delete(run);};}});
+      const q=mk(()=>true);
+      q.add=async d=>{const id=Date.now().toString(36)+Math.random().toString(36).slice(2,8);await J("PUT",c+"/"+id,d);poke();return{id};};
+      return q;}};}
+/* media (audio, gifs) is stored apart from messages so lists stay light */
+const mcache=new Map();
+function getMedia(id){if(!id)return Promise.resolve("");
+  if(!mcache.has(id))mcache.set(id,db.doc("media/"+id).get().then(s=>s.exists?s.data().data:"").catch(()=>{mcache.delete(id);return"";}));
+  return mcache.get(id);}
 /* sound effects */
 let ac;function tone(f,d=.12,at=0){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+at;
   o.frequency.value=f;o.connect(g);g.connect(ac.destination);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.2,t+.02);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.start(t);o.stop(t+d+.02);}catch(e){}}
@@ -266,8 +312,9 @@ async function enter(phone){
     db.collection("chats").where("members","array-contains",phone).onSnapshot(q=>{chats=q.docs.map(d=>Object.assign({id:d.id},d.data()));render();},fail),
     db.collection("messages").onSnapshot(q=>{msgs=q.docs.map(d=>Object.assign({id:d.id},d.data())).sort((a,b)=>a.t-b.t);render();},fail)];
   db.doc("chats/self_"+phone).set({type:"self",members:[phone],t:0}).catch(fail);
+  unsubs.push(db.collection("presence").onSnapshot(onPres,fail));
   sset(phone);beat();$("auth").hidden=true;$("app").hidden=false;render();}
-function logout(){sset("");if(me)pset(me.phone,0);unsubs.forEach(f=>f());unsubs=[];stopAudio();me=null;users={};contacts={};chats=[];msgs=[];cid=null;$("app").classList.remove("in-chat");showAuth("in");}
+function logout(){sset("");if(me&&db)db.doc("presence/"+me.phone).set({t:0,c:""}).catch(()=>{});pres={};unsubs.forEach(f=>f());unsubs=[];stopAudio();me=null;users={};contacts={};chats=[];msgs=[];cid=null;$("app").classList.remove("in-chat");showAuth("in");}
 /* dialogs */
 function editProfile(){const n=h("input",{type:"text",value:me.name,maxlength:30}),p=photoField(me.photo,me.name);
   modal(T("Edit profile"),h("div",{class:"stack"},n,p.node),T("Save"),async()=>{const v=n.value.trim();if(!v)return T("Enter a name.");await db.doc("users/"+me.phone).update({name:v,photo:p.get()});});}
@@ -284,13 +331,17 @@ function newGroup(){const list=[...new Set([...Object.keys(contacts),...chats.fi
     cs=list.map(ph=>{const c=h("input",{type:"checkbox"});return{ph,c,row:h("label",{class:"pick"},c,av(users[ph],32),h("span",{text:nameOf(ph)}))};});
   modal(T("New group"),h("div",{class:"stack"},nm,p.node,h("div",{class:"picks"},cs.map(x=>x.row))),T("Create"),async()=>{
     const sel=cs.filter(x=>x.c.checked).map(x=>x.ph),n=nm.value.trim();if(!n)return T("Enter a group name.");if(sel.length<1)return T("Select at least one contact.");
-    const id="g"+Date.now().toString(36)+rnd(3);await db.doc("chats/"+id).set({type:"group",name:n,photo:p.get(),members:[me.phone,...sel],t:Date.now()});
+    const id="g"+Date.now().toString(36)+rnd(3);await db.doc("chats/"+id).set({type:"group",name:n,photo:p.get(),members:[me.phone,...sel],owner:me.phone,t:Date.now()});
     cid=id;$("app").classList.add("in-chat");});}
 function renameContact(c){const o=other(c),n=h("input",{type:"text",value:nameOf(o),maxlength:30});
   modal(T("Change contact name"),n,T("Save"),async()=>{const v=n.value.trim();if(!v)return T("Enter a name.");await db.doc("contacts/"+me.phone+"_"+o).set({owner:me.phone,other:o,alias:v});});}
 function renameGroup(c){const n=h("input",{type:"text",value:c.name,maxlength:30});
   modal(T("Change group name"),n,T("Save"),async()=>{const v=n.value.trim();if(!v)return T("Enter a name.");await db.doc("chats/"+c.id).update({name:v});});}
 function groupPhoto(c){const p=photoField(c.photo,c.name);modal(T("Change group photo"),p.node,T("Save"),async()=>{await db.doc("chats/"+c.id).update({photo:p.get()});});}
+function clearChat(c){const all=c.type==="group";
+  modal(T("Clear chat"),h("p",{text:T(all?"Clear this chat for everyone in the group?":"Clear this chat? Messages will be removed only for you.")}),T("Clear"),async()=>{
+    if(all)msgs.filter(m=>m.chat===c.id).forEach(m=>db.doc("messages/"+m.id).delete().catch(()=>{}));
+    else await db.doc("chats/"+c.id).update({["clr_"+me.phone]:Date.now()});});}
 function delChat(c){modal(T("Delete chat"),h("p",{text:T("Delete this chat and all its messages?")}),T("Delete"),async()=>{
   msgs.filter(m=>m.chat===c.id).forEach(m=>db.doc("messages/"+m.id).delete().catch(()=>{}));
   await db.doc("chats/"+c.id).delete();cid=null;$("app").classList.remove("in-chat");});}
@@ -300,13 +351,15 @@ $("dots").onclick=()=>{const c=cur();if(!c)return;let it=[];
   if(c.type==="self")it=[[T("Change my name"),editProfile],[T("Change my photo"),editProfile]];
   else if(c.type==="group")it=[[T("Change group name"),()=>renameGroup(c)],[T("Change group photo"),()=>groupPhoto(c)],[T("Delete chat"),()=>delChat(c),"x"]];
   else it=[[T("Change contact name"),()=>renameContact(c)],[T("Delete chat"),()=>delChat(c),"x"]];
+  if(c.type==="group"){if((c.owner||c.members[0])===me.phone)it.splice(it.length-1,0,[T("Clear chat"),()=>clearChat(c),"x"]);}
+  else it.splice(c.type==="self"?it.length:it.length-1,0,[T("Clear chat"),()=>clearChat(c),"x"]);
   it.push(langItem());it.push([T("Log out"),logout,"x"]);menu($("dots"),it);};
 $("back").onclick=()=>$("app").classList.remove("in-chat");
 /* audio playback */
 function stopAudio(){if(cp){cp.audio.pause();cp=null;paint();}}
-function toggle(m){
+async function toggle(m){
   if(cp&&cp.id===m.id){cp.audio.paused?cp.audio.play():cp.audio.pause();paint();return;}
-  stopAudio();const a=new Audio(m.audio);cp={id:m.id,audio:a,dur:m.dur};
+  stopAudio();const u=m.audio||await getMedia(m.media);if(!u)return;const a=new Audio(u);cp={id:m.id,audio:a,dur:m.dur};
   a.ontimeupdate=a.onpause=a.onplay=paint;a.onended=()=>{sfx.pend();cp=null;paint();};
   sfx.pstart();a.play().catch(()=>{cp=null;paint();});}
 function seek(m,f){if(cp&&cp.id===m.id)cp.audio.currentTime=Math.max(0,Math.min(1,f))*m.dur;else toggle(m);}
@@ -314,6 +367,11 @@ function paint(){document.querySelectorAll(".msg .aud").forEach(e=>{const id=e.p
   p=on?Math.min(1,cp.audio.currentTime/(cp.dur||1)):0,bs=e.querySelectorAll(".bar");
   bs.forEach((b,i)=>b.classList.toggle("on",i/bs.length<p));e.querySelector(".knob").style.left=(p*100)+"%";
   e.querySelector(".play").textContent=on&&!cp.audio.paused?"❚❚":"▶";});}
+function bodyEl(m,sender,mn){
+  if(m.kind==="audio")return audioEl(m,sender,mn);
+  if(m.kind==="sticker")return h("div",{class:"stk",text:m.text});
+  if(m.kind==="gif"){const i=h("img",{class:"gifimg",alt:"GIF"});getMedia(m.media).then(u=>{if(u)i.src=u;});return i;}
+  return h("p",{text:m.text});}
 function audioEl(m,sender,mine){
   const bars=(m.wave||[]).map(v=>h("div",{class:"bar",style:`height:${Math.max(12,v)}%`})),knob=h("div",{class:"knob"}),
     track=h("div",{class:"track",onclick:e=>{const r=track.getBoundingClientRect();seek(m,(e.clientX-r.left)/r.width);}},bars,knob),
@@ -335,7 +393,8 @@ async function startRec(){
       const url=await new Promise(res=>{const f=new FileReader();f.onload=()=>res(f.result);f.readAsDataURL(new Blob(chunks,{type:mr.mimeType}));});
       const n=36,wave=Array.from({length:n},(_,i)=>{const s=levels.slice(Math.floor(i*levels.length/n),Math.max(Math.floor((i+1)*levels.length/n),Math.floor(i*levels.length/n)+1));
         return Math.round(Math.min(1,(s.reduce((a,b)=>a+b,0)/(s.length||1))*3)*100);});
-      db.collection("messages").add({chat:r.chat,from:me.phone,kind:"audio",audio:url,dur:+dur.toFixed(1),wave,t:Date.now(),seen:false}).then(sfx.sent).catch(fail);};
+      const mid="a"+Date.now().toString(36)+rnd(3);mcache.set(mid,Promise.resolve(url));
+      db.doc("media/"+mid).set({data:url}).then(()=>db.collection("messages").add({chat:r.chat,from:me.phone,kind:"audio",media:mid,dur:+dur.toFixed(1),wave,t:Date.now(),seen:false})).then(sfx.sent).catch(fail);};
     mr.start();sfx.rec();setRecUI(true);
   }catch(e){const n=e&&e.name,k=n==="NotFoundError"?"No microphone was found on this device.":n==="NotAllowedError"?"Microphone blocked. Allow it from the lock icon in the address bar, or open the downloaded index.html file instead.":"The microphone can’t be used here. Open the downloaded index.html file in your browser.";
     modal(T("Microphone"),h("p",{text:T(k)}),T("OK"));}}
@@ -345,23 +404,64 @@ $("cancel").onclick=()=>stopRec(false);
 const sendText=()=>{const v=$("txt").value.trim();if(!db||!cur()||!v)return;$("txt").value="";
   db.collection("messages").add({chat:cid,from:me.phone,kind:"text",text:v,t:Date.now(),seen:false}).catch(fail);};
 $("send").onclick=sendText;$("txt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();sendText();}};
-/* online status */
-const PK="msgapp-pres";let pmem={};
-const pread=()=>{try{return JSON.parse(localStorage.getItem(PK)||"{}");}catch(e){return pmem;}};
-const pset=(ph,t)=>{const o=pread();o[ph]=t;pmem=o;try{localStorage.setItem(PK,JSON.stringify(o));}catch(e){}};
-const isOn=ph=>Date.now()-(pread()[ph]||0)<20000;
+/* emoji / stickers / gifs / mini keyboard */
+const touch=matchMedia("(pointer:coarse)").matches||(navigator.maxTouchPoints>0&&!matchMedia("(hover:hover)").matches);
+const seg=x=>{try{return Array.from(new Intl.Segmenter().segment(x),y=>y.segment);}catch(e){return Array.from(x);}};
+const EMO=seg("😀😁😂🤣😊😍😘😎🤔😢😭😡🥳😴🤗😉😅🙄😮😇🤩😜🤝👍👎👏🙏💪🙌👋✌️❤️💔💕🔥⭐🌈🌹☀️🌙🎉🎂🎁🍕🍔🍺☕⚽🎵🚗✈️🏠🐶🐱🐼🦊🐵🐸");
+const STK=seg("🐶🐱🦊🐼🐵🦄🐸🐧🎂🎁🌈🔥💯🤝🥰😎🤩😱🙌💃🕺🍕☕🏆");
+const caret=()=>{const t=$("txt"),a=t.selectionStart==null?t.value.length:t.selectionStart;return[a,t.selectionEnd==null?a:t.selectionEnd];};
+function ins(x){const t=$("txt"),[a,b]=caret();t.value=t.value.slice(0,a)+x+t.value.slice(b);try{t.setSelectionRange(a+x.length,a+x.length);}catch(e){}}
+function back(){const t=$("txt"),[a,b]=caret();let l=a;
+  if(a===b&&a>0){const g=seg(t.value.slice(0,a));g.pop();l=g.join("").length;}
+  t.value=t.value.slice(0,l)+t.value.slice(b);try{t.setSelectionRange(l,l);}catch(e){}}
+let kbShift=false,kbNum=false,ptab="emoji",lastBeatCid=null;
+const hidePanels=()=>{$("kb").hidden=true;$("panel").hidden=true;};
+function showKb(){if(!touch||rec)return;$("panel").hidden=true;$("kb").hidden=false;drawKb();}
+function showPanel(t){ptab=t||ptab;$("kb").hidden=true;$("panel").hidden=false;drawPanel();}
+const key=(label,cls,fn)=>h("button",{type:"button",class:cls||"",text:label,onmousedown:e=>e.preventDefault(),onclick:fn});
+function drawKb(){
+  const L=[["q","w","e","r","t","y","u","i","o","p"],["a","s","d","f","g","h","j","k","l","ñ"],["z","x","c","v","b","n","m"]],
+    N=[["1","2","3","4","5","6","7","8","9","0"],["-","/",":",";","(",")","€","&","@",'"'],[".",",","?","!","'"]];
+  const rows=(kbNum?N:L).map((r,i)=>h("div",{class:"kr"},
+    i===2&&!kbNum?key("⇧","wide"+(kbShift?" on":""),()=>{kbShift=!kbShift;drawKb();}):null,
+    r.map(k=>{const v=kbShift&&!kbNum?k.toUpperCase():k;return key(v,"",()=>{ins(v);if(kbShift){kbShift=false;drawKb();}});}),
+    i===2?key("⌫","wide",back):null));
+  rows.push(h("div",{class:"kr"},key(kbNum?"ABC":"?123","wide",()=>{kbNum=!kbNum;drawKb();}),key("😊","wide",()=>showPanel()),
+    key("␣","space",()=>ins(" ")),key("⌄","wide",hidePanels),key("↵","wide primary",sendText)));
+  $("kb").replaceChildren(...rows);}
+function drawPanel(){
+  const tabs=h("div",{class:"ptabs"},[["emoji","Emoji"],["sticker","Stickers"],["gif","GIF"]].map(([k,l])=>key(T(l),k===ptab?"on":"",()=>{ptab=k;drawPanel();})),h("span",{style:"flex:1"}),key("⌄","",hidePanels));
+  let body;
+  if(ptab==="emoji")body=h("div",{class:"pg"},EMO.map(e=>key(e,"",()=>ins(e))));
+  else if(ptab==="sticker")body=h("div",{class:"pg st"},STK.map(e=>key(e,"",()=>sendKind("sticker",e))));
+  else{const inp=h("input",{type:"file",accept:"image/gif",class:"vh"});inp.onchange=()=>{if(inp.files[0])sendGif(inp.files[0]);inp.value="";};
+    body=h("div",{class:"pgif"},h("label",{class:"filebtn"},T("Choose GIF"),inp),h("p",{class:"hint",text:T("GIF files up to 500 KB.")}));}
+  $("panel").replaceChildren(tabs,body);}
+function sendKind(kind,text){if(!db||!cur())return;db.collection("messages").add({chat:cid,from:me.phone,kind,text,t:Date.now(),seen:false}).then(sfx.sent).catch(fail);}
+function sendGif(f){if(!cur())return;if(f.size>500000){toast(T("GIF files up to 500 KB."));return;}
+  const r=new FileReader();r.onerror=()=>toast(T("Could not send that file."));
+  r.onload=()=>{const mid="g"+Date.now().toString(36)+rnd(3);mcache.set(mid,Promise.resolve(r.result));
+    db.doc("media/"+mid).set({data:r.result}).then(()=>db.collection("messages").add({chat:cid,from:me.phone,kind:"gif",media:mid,t:Date.now(),seen:false})).then(sfx.sent).catch(fail);};
+  r.readAsDataURL(f);}
+$("emo").onclick=()=>{$("panel").hidden?showPanel():hidePanels();};
+$("msgs").addEventListener("click",hidePanels);
+if(touch){$("txt").setAttribute("inputmode","none");$("txt").addEventListener("focus",showKb);$("txt").addEventListener("click",showKb);}
+/* online status: only shown when the person has THIS chat open */
+let pres={};
+function onPres(q){const now=Date.now();q.docs.forEach(d=>{const v=d.data(),p=pres[d.id];if(!p||p.t!==v.t)pres[d.id]={t:v.t,c:v.c,at:now};});paintStatus();}
+const isIn=ph=>{const v=pres[ph];return !!v&&v.t>0&&Date.now()-v.at<15000&&v.c===cid;};
 function paintStatus(){const el=$("sub"),c=cur();if(!el)return;let t="";
-  if(c&&me){if(c.type==="dm"){if(isOn(other(c)))t=T("Online");}
-    else if(c.type==="group"){const ns=c.members.filter(p=>p!==me.phone&&isOn(p)).map(nameOf);if(ns.length)t=T("Online: ")+ns.join(", ");}}
+  if(c&&me){if(c.type==="dm"){if(isIn(other(c)))t=T("Online");}
+    else if(c.type==="group"){const ns=c.members.filter(p=>p!==me.phone&&isIn(p)).map(nameOf);if(ns.length)t=T("Online: ")+ns.join(", ");}}
   el.textContent=t;}
-function beat(){if(me&&document.visibilityState==="visible")pset(me.phone,Date.now());paintStatus();}
-window.addEventListener("storage",e=>{if(e.key===PK)paintStatus();});
-window.addEventListener("pagehide",()=>{if(me)pset(me.phone,0);});
-setInterval(beat,6000);
+function beat(){if(me&&db&&document.visibilityState==="visible")db.doc("presence/"+me.phone).set({t:Date.now(),c:cid||""}).catch(()=>{});paintStatus();}
+window.addEventListener("pagehide",()=>{if(me&&db)db.doc("presence/"+me.phone).set({t:0,c:""});});
+setInterval(()=>{beat();},5000);
 /* render */
 function render(){
   if(!me)return;
-  const mine=new Set(chats.map(c=>c.id)),all=msgs.filter(m=>mine.has(m.chat));
+  if(cid!==lastBeatCid){lastBeatCid=cid;beat();}
+  const mine=new Set(chats.map(c=>c.id)),cmap=Object.fromEntries(chats.map(c=>[c.id,c])),all=msgs.filter(m=>mine.has(m.chat)&&m.t>(cmap[m.chat]["clr_"+me.phone]||0));
   const last=c=>Math.max(c.t||0,...all.filter(m=>m.chat===c.id).map(m=>m.t));
   const sorted=chats.slice().sort((a,b)=>last(b)-last(a));
   if(cid===null&&sorted.length)cid=sorted[0].id;
@@ -376,7 +476,8 @@ function render(){
   box.replaceChildren(...(cm.length?cm.map(m=>{
     const mn=m.from===me.phone,sender=mn?me:(users[m.from]||{name:nameOf(m.from)}),el=h("div",{class:"msg "+(mn?"mine":"theirs"),"data-id":m.id});
     if(c.type==="group"&&!mn)el.append(h("b",{class:"who",text:nameOf(m.from)}));
-    el.append(m.kind==="audio"?audioEl(m,sender,mn):h("p",{text:m.text}));
+    if(m.kind==="sticker"||m.kind==="gif")el.classList.add("bare");
+    el.append(bodyEl(m,sender,mn));
     const meta=h("div",{class:"meta"});
     if(mn)meta.append(h("button",{class:"del",text:T("Delete"),onclick:()=>db.doc("messages/"+m.id).delete().catch(fail)}));
     meta.append(h("time",{text:(m.kind==="audio"?fmt(m.dur||0)+" · ":"")+hm(m.t)}));
@@ -387,7 +488,7 @@ function render(){
     db.doc("messages/"+m.id).update({seen:true}).catch(()=>marking.delete(m.id));}});
 }
 document.addEventListener("visibilitychange",render);window.addEventListener("focus",render);
-db=local;applyStatic();
+db=SERVER?remote(SERVER):local;applyStatic();
 (async()=>{const p=sget();if(p){try{if((await db.doc("users/"+p).get()).exists){await enter(p);return;}}catch(e){}sset("");showAuth("in");return;}showAuth("up");})();
 </script>
 </body>
